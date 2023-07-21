@@ -41,16 +41,16 @@ export const avatarProp = 'avataredit';                                       //
 export const profileProp = 'profiledit';                                      // added as element names' base & form ids 4 react props
 export const cardProp = 'cardadd';                                            // added as element names' base & form ids 4 react props
 export const confirmProp = 'confirm';                                         // added as element names' base & form ids 4 react props
-export const avatarInputs = [ {key: `${avatarProp}_01`, type: "url", name: "avatarlink", placeholder: "Ссылка на аватар"} ];
-export const profileInputs = [ {key: `${profileProp}_01`
+export const avatarInputs = [ {num: `${avatarProp}_01`, type: "url", name: "avatarlink", placeholder: "Ссылка на аватар"} ];
+export const profileInputs = [ {num: `${profileProp}_01`
     , type: "text", name: "profilename", placeholder: "Имя", minlen: "2", maxlen: "40"
-  } , {key: `${profileProp}_02`
+  } , {num: `${profileProp}_02`
     , type: "text", name: "profilabout", placeholder: "О себе", minlen: "2", maxlen: "200"
   }
 ];
-export const cardInputs = [ {key: `${cardProp}_01`
+export const cardInputs = [ {num: `${cardProp}_01`
     , type: "text", name: "cardname", placeholder: "Название", minlen: "2", maxlen: "30"
-  } , {key: `${cardProp}_02`
+  } , {num: `${cardProp}_02`
     , type: "url", name: "cardlink", placeholder: "Ссылка на картиннку"
   }
 ];
