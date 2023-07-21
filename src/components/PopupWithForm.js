@@ -1,4 +1,3 @@
-import { Children, children } from 'react';
 import {popupActiveClass} from '../utils/constants.js'
 function PopupWithForm({name, title, isOpen, onClose, ...frmFields}) {
   return (
@@ -15,7 +14,6 @@ function PopupWithForm({name, title, isOpen, onClose, ...frmFields}) {
       </div>
     </div>    
   );
-
 }
 
 export default PopupWithForm;
