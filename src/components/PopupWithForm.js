@@ -1,3 +1,4 @@
+import { Children, children } from 'react';
 import {popupActiveClass} from '../utils/constants.js'
 function PopupWithForm({name, title, isOpen, onClose, ...frmFields}) {
   return (
@@ -7,7 +8,7 @@ function PopupWithForm({name, title, isOpen, onClose, ...frmFields}) {
         <div className="popup__form">
           <h2 className="popup__title">{title}</h2>
           <form className="popup__items" id={name} name={`${name}_frm`} noValidate>
-            {frmFields.children && inputItems(frmFields.children)}
+            {frmFields.children}
             <button type="submit" className="popup__save">{frmFields.btnCaption}</button>
           </form>
         </div>
@@ -15,24 +16,6 @@ function PopupWithForm({name, title, isOpen, onClose, ...frmFields}) {
     </div>    
   );
 
-  function inputItems (inputFields) {
-    return (Object.keys(inputFields)[0] === '0' ? inputFields.map((input, i) => <fieldset
-      key={`fields_${String(i)}`} style={{padding: 0, border: 0, outline: 0}}> { (input.minlen && input.maxlen)
-      ?
-        <input className="popup__input popup__input_validated" type={input.type}
-          name={input.name} placeholder={input.placeholder} minLength={input.minlen} maxLength={input.maxlen}
-        required />
-      : 
-        <input className="popup__input popup__input_validated" type={input.type}
-          name={input.name} placeholder={input.placeholder}
-        required />
-      }
-        <span className={`popup__error-msg popup__error-msg_type_${input.name}`}></span>
-      </fieldset>
-    ) : (
-      <>{inputFields}</>
-    ));
-  }
 }
 
 export default PopupWithForm;
