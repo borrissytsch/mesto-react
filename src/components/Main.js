@@ -38,7 +38,7 @@ function Main({clickHandlers, formName, onClose}) {
   
   function createCardItems (cards) { 
     return cards.map((card, i) => (
-      <Card key={`card_${String(i)}_${card._id}`} card={card} onCardClick={clickHandlers.onCardClick} />
+      <Card key={`card_${card._id}`} card={card} onCardClick={clickHandlers.onCardClick} />
     ));
   }
 }
