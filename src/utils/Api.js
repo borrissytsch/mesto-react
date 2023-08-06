@@ -51,6 +51,12 @@ constructor (loginData) {
   deleteLike(cardID, dir = `cards/${cardID}/likes`, handler = this._retPromiseResponse, request = 'DELETE') {
     return this.autorize(dir, handler, request)
   }
+
+  changeLikeStatus(cardID, fromLiked, dir = `cards/${cardID}/likes`
+    , handler = this._retPromiseResponse, request = fromLiked ? 'DELETE' : 'PUT'
+  ) {
+    return this.autorize(dir, handler, request)
+  }
 }
 
 export const mestApi = new Api(srvLoginData);

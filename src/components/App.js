@@ -1,60 +1,114 @@
 // import './App.css';
-import React, { useState } from 'react';
-import Header from './Header.js'
-import Main from './Main.js'
-import Footer from './Footer.js'
-import PopupWithForm from './PopupWithForm.js'
-import ImagePopup from './ImagePopup.js'
-import {avatarProp, profileProp, cardProp, confirmProp
-  , captionProfileButton, captionCardButton, captionConfirmButton, popupActiveClass
-} from '../utils/constants.js'
+import React, { useState, useEffect } from 'react';
+import Header from './Header.js';
+import Main from './Main.js';
+import Footer from './Footer.js';
+import PopupWithForm from './PopupWithForm.js';
+import EditAvatarPopup from './EditAvatarPopup.jsx';
+import EditProfilePopup from './EditProfilePopup.jsx';
+import AddPlacePopup from './AddPlacePopup.jsx';
+import ImagePopup from './ImagePopup.js';
+import {mestApi} from '../utils/Api.js';
+import {CurrentUserContext} from '../contexts/CurrentUserContext.js';
+import {avatarProp, profileProp, cardProp, confirmProp, popupActiveClass
+  , captionProfileButton, captionCardButton, msgSubmitButtonWait, captionConfirmButton
+  , errMsg4AvatarForm, errMsg4ProfileForm, errMsg4AddCardForm, errMsg4GetCardsInfo
+  , errMsg4CardLikeAdd, errMsg4CardLikeDel
+} from '../utils/constants.js';
 function App() {
+  const [currentUser, setCurrentUser] = useState({name: "Жак-Ив Кусто"
+    , about: "Исследователь океана"
+    , avatar: "https://pictures.s3.yandex.net/frontend-developer/common/ava.jpg"
+  });
+  const [cards, setCards] = useState([]);
   const [isEditAvatarPopupOpen, setAvatarOpen] = useState(false);
   const [isEditProfilePopupOpen, setProfileOpen] = useState(false);
   const [isAddPlacePopupOpen, setAddCardOpen] = useState(false);
+  const [isConfirmOpen, setConfirmOpen] = useState(false);
   const [selectedCard, setCardOpen] = useState(null);
+  const [btnProfileCaption, setProfileCaption] = useState(captionProfileButton);
+  const [btnCardCaption, setCardCaption] = useState(captionCardButton);
   const clickHandlers = {onEditAvatar: handleEditAvatarClick, onEditProfile: handleEditProfileClick
-    , onAddPlace: handleAddPlaceClick, onCardClick: handleCardClick};
+    , onConfirm: handleConfirm, onAddPlace: handleAddPlaceClick, onCardClick: handleCardClick
+  };
   const formName = {avatar: avatarProp, profile: profileProp, card: cardProp, confirm: confirmProp};
+  useEffect(() => {
+    Promise.all([mestApi.autorize(), mestApi.getInitialCards()]).then(result => {
+      setCurrentUser(result[0]); // , id: result[0]._id, cohort: result[0].cohort
+      setCards(result[1]);
+    }).catch(err => console.log(errMsg4GetCardsInfo(err)));
+  }, []);
+
   return (
     <div>
-      <Header />
-      <Main clickHandlers={clickHandlers} formName={formName} onClose={closeAllPopups} />
-      <Footer />
-      <PopupWithForm name={avatarProp} title="Обновить аватар" isOpen={isEditAvatarPopupOpen}
-        onClose={closeAllPopups} btnCaption={captionProfileButton}>
-        <input className="popup__input popup__input_validated" type="url" name="avatarlink" placeholder="Ссылка на аватар" required />
-        <span className="popup__error-msg popup__error-msg_type_avatarlink"></span>
-      </PopupWithForm>
-      <PopupWithForm name={profileProp} title="Редактировать профиль" isOpen={isEditProfilePopupOpen}
-        onClose={closeAllPopups} btnCaption={captionProfileButton}>
-        <input className="popup__input popup__input_validated" type="text"name="profilename" placeholder="Имя" minLength="2" maxLength="40" required />
-        <span className="popup__error-msg popup__error-msg_type_profilename"></span>
-        <input className="popup__input popup__input_validated" type="text"name="profilabout" placeholder="О себе" minLength="2" maxLength="200" required />
-        <span className="popup__error-msg popup__error-msg_type_profilabout"></span>
-      </PopupWithForm>
-      <PopupWithForm name={cardProp} title="Новое место" isOpen={isAddPlacePopupOpen} onClose={closeAllPopups}
-        btnCaption={captionCardButton}>
-        <input className="popup__input popup__input_validated" type="text" name="cardname" placeholder="Название" minLength="2" maxLength="30" required />
-        <span className="popup__error-msg popup__error-msg_type_cardname"></span>
-        <input className="popup__input popup__input_validated" type="url" name="cardlink" placeholder="Ссылка на картиннку" required />
-        <span className="popup__error-msg popup__error-msg_type_cardlink"></span>
-      </PopupWithForm>
-      <PopupWithForm name={confirmProp} title="Вы уверены?" onClose={closeAllPopups} btnCaption={captionConfirmButton} />
-      <ImagePopup card={selectedCard} onClose={closeAllPopups} openClass={popupActiveClass} />
+      <CurrentUserContext.Provider value={currentUser}>
+        <Header />
+        <Main clickHandlers={clickHandlers} formName={formName} onClose={closeAllPopups} cards={cards}
+          onCardLike={handleCardLike} onCardDelete={handleCardDelete}
+        />
+        <Footer />
+        <EditAvatarPopup isOpen={isEditAvatarPopupOpen} onClose={closeAllPopups}
+          onUpdateAvatar={handleUpdateAvatar} btnCaption={btnProfileCaption}
+        />
+        <EditProfilePopup isOpen={isEditProfilePopupOpen} onClose={closeAllPopups}
+          onUpdateUser={handleUpdateUser} btnCaption={btnProfileCaption}
+        />
+        <AddPlacePopup isOpen={isAddPlacePopupOpen} onClose={closeAllPopups}
+          onAddPlace={handleAddPlaceSubmit} btnCaption={btnCardCaption}
+        />
+        <PopupWithForm isOpen={isConfirmOpen} name={confirmProp} title="Вы уверены?" onClose={closeAllPopups}
+          onSubmit={handleConfirm} btnCaption={captionConfirmButton} />
+        <ImagePopup card={selectedCard} onClose={closeAllPopups} openClass={popupActiveClass} />
+      </CurrentUserContext.Provider>
     </div>
   );
 
   function handleEditAvatarClick(evt, setOpen_flag = true) {
     setAvatarOpen(setOpen_flag);
   }
-
+  
+  function handleUpdateAvatar (evt, refAvatar) {
+    evt.preventDefault();
+    setProfileCaption(msgSubmitButtonWait);
+    mestApi.updateAvatar(refAvatar).then(result => {
+      const newUser = currentUser; newUser.avatar = result.avatar;
+      setCurrentUser(newUser);
+    }).catch(err => console.log(errMsg4AvatarForm(err))
+    ).finally(() => setProfileCaption(captionProfileButton));
+    closeAllPopups(evt);
+  }
+  
   function handleEditProfileClick (evt, setOpen_flag = true) {
     setProfileOpen(setOpen_flag);
+  }
+
+  function handleUpdateUser (evt, userData) {
+    evt.preventDefault();
+    setProfileCaption(msgSubmitButtonWait);
+    mestApi.updateProfile(userData).then(result => {
+      const newUser = currentUser; newUser.name = result.name; newUser.about = result.about;
+      setCurrentUser(newUser);
+    }).catch(err => console.log(errMsg4ProfileForm(err))
+    ).finally(() => setProfileCaption(captionProfileButton));
+    closeAllPopups(evt);
+  }
+
+  function handleConfirm(evt, setOpen_flag = isConfirmOpen) {
+    setConfirmOpen(false);
   }
   
   function handleAddPlaceClick (evt, setOpen_flag = true) {
     setAddCardOpen(setOpen_flag);
+  }
+  
+  function handleAddPlaceSubmit (evt, card) {
+    evt.preventDefault();
+    setCardCaption(msgSubmitButtonWait);
+    mestApi.addCard(card).then(result => {
+      setCards([result, ...cards]);
+    }).catch(err => console.log(errMsg4AddCardForm(err))
+    ).finally(() => setCardCaption(captionCardButton));
+    closeAllPopups(evt);
   }
 
   function handleCardClick(evt, setOpen_flag = true, card) {
@@ -66,10 +120,25 @@ function App() {
       document.removeEventListener('keydown', closeAllPopups)
     }
   }
+  
+  function handleCardLike(evt, card) {
+    evt.preventDefault(); evt.stopPropagation();
+    const isLiked = card.likes.some(i => i._id === currentUser._id);
+    mestApi.changeLikeStatus(card._id, isLiked).then(result => {
+      setCards(cards => cards.map(item => item._id === card._id ? result : item));
+    }).catch(err => console.log(errMsg4CardLikeAdd(err)))
+  }
+
+  function handleCardDelete (evt, card) {
+    evt.preventDefault(); evt.stopPropagation();
+    mestApi.deleteCard(card._id).then(result => {
+      setCards(cards => cards.filter(item => item._id !== card._id));
+    }).catch(err => console.log(errMsg4CardLikeDel(err)))
+  }
 
   function closeAllPopups(evt) {
     if ((evt.target === evt.currentTarget) || evt.key === "Escape") Object.keys(clickHandlers).forEach(handler => 
-      clickHandlers[handler](evt, false)
+      clickHandlers[handler](evt, false, true)
     );
   }
 }

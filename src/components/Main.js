@@ -1,20 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import {mestApi} from '../utils/Api.js'
 import Card from './Card.js'
+import {CurrentUserContext} from '../contexts/CurrentUserContext.js';
 import { errMsg4GetCardsInfo } from '../utils/constants.js'
-function Main({clickHandlers, formName, onClose}) {
-  const [userName, setUserName] = useState("Жак-Ив Кусто");
-  const [userDescription, setUserDescription] = useState("Исследователь океана");
-  const [userAvatar, setUserAvatar] = useState("https://pictures.s3.yandex.net/frontend-developer/common/ava.jpg");     // ./../images/cousteau/cousteau_image.png
-  const [cards, setCards] = useState([]);
-  
-  useEffect(() => {
-    Promise.all([mestApi.autorize(), mestApi.getInitialCards()]).then(result => {
-      setUserName(result[0].name); setUserDescription(result[0].about); setUserAvatar(result[0].avatar);
-      // , id: result[0]._id, cohort: result[0].cohort
-      setCards(result[1]);
-    }).catch(err => console.log(errMsg4GetCardsInfo(err)));
-  }, []);
+function Main({clickHandlers, formName, onClose, cards, onCardLike, onCardDelete}) {
+  const {name, about, avatar, _id, cohort} = React.useContext(CurrentUserContext);
+  const userName = name; const userDescription = about; const userAvatar = avatar;
 
   return (
     <main className="content">
@@ -38,7 +29,9 @@ function Main({clickHandlers, formName, onClose}) {
   
   function createCardItems (cards) { 
     return cards.map((card, i) => (
-      <Card key={`card_${card._id}`} card={card} onCardClick={clickHandlers.onCardClick} />
+      <Card key={`card_${card._id}`} card={card} onCardClick={clickHandlers.onCardClick}
+        onCardLike={onCardLike} onCardDelete={onCardDelete}
+      />
     ));
   }
 }
