@@ -8,7 +8,7 @@ export default function EditProfilePopup ({isOpen, onClose, onUpdateUser, ...frm
   const [about, setAbout] = useState(currentUser.about);
   useEffect(() => {
     setName(currentUser.name); setAbout(currentUser.about);
-  }, [currentUser]);
+  }, [currentUser, isOpen]);
   return (
     <PopupWithForm name={profileProp} title="Редактировать профиль" isOpen={isOpen} onClose={onClose}
       onSubmit={evt => onUpdateUser(evt, {name: name, about: about})} btnCaption={frmFields.btnCaption}>

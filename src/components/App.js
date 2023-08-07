@@ -73,9 +73,9 @@ function App() {
     mestApi.updateAvatar(refAvatar).then(result => {
       const newUser = currentUser; newUser.avatar = result.avatar;
       setCurrentUser(newUser);
+      closeAllPopups(evt, true);
     }).catch(err => console.log(errMsg4AvatarForm(err))
     ).finally(() => setProfileCaption(captionProfileButton));
-    closeAllPopups(evt);
   }
   
   function handleEditProfileClick (evt, setOpen_flag = true) {
@@ -88,9 +88,9 @@ function App() {
     mestApi.updateProfile(userData).then(result => {
       const newUser = currentUser; newUser.name = result.name; newUser.about = result.about;
       setCurrentUser(newUser);
+      closeAllPopups(evt, true);
     }).catch(err => console.log(errMsg4ProfileForm(err))
     ).finally(() => setProfileCaption(captionProfileButton));
-    closeAllPopups(evt);
   }
 
   function handleConfirm(evt, setOpen_flag = isConfirmOpen) {
@@ -106,9 +106,9 @@ function App() {
     setCardCaption(msgSubmitButtonWait);
     mestApi.addCard(card).then(result => {
       setCards([result, ...cards]);
+      closeAllPopups(evt, true);
     }).catch(err => console.log(errMsg4AddCardForm(err))
     ).finally(() => setCardCaption(captionCardButton));
-    closeAllPopups(evt);
   }
 
   function handleCardClick(evt, setOpen_flag = true, card) {
@@ -136,9 +136,10 @@ function App() {
     }).catch(err => console.log(errMsg4CardLikeDel(err)))
   }
 
-  function closeAllPopups(evt) {
-    if ((evt.target === evt.currentTarget) || evt.key === "Escape") Object.keys(clickHandlers).forEach(handler => 
-      clickHandlers[handler](evt, false, true)
+  function closeAllPopups(evt, forceClose_flag = false) {
+    //alert(`Close all popups ${evt.target === evt.currentTarget}: ${evt.target} ${evt.currentTarget} ${evt.key}`);
+    if ((evt.target === evt.currentTarget) || evt.key === "Escape" || forceClose_flag) Object.keys(
+      clickHandlers).forEach(handler => clickHandlers[handler](evt, false, true)
     );
   }
 }
